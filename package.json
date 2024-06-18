@@ -15,7 +15,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@renfraser/cody-client": "^0.1.1",
+    "@renfraser/cody-client": "^1.0.0",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2"
   }
