@@ -1,47 +1,49 @@
 import {
-    CodyClient,
-    SendMessageCommand,
-    SendMessageCommandInput,
-    SendMessageCommandOutput
+  CodyClient,
+  SendMessageCommand,
+  SendMessageCommandInput,
+  SendMessageCommandOutput,
 } from "@renfraser/cody-client";
-import {codyConfig} from "../../config";
+import { codyConfig } from "../../config";
 
-describe('SendMessage', () => {
-    it('should return the expected status code response', async () => {
+describe("SendMessage", () => {
+  it("should return the expected status code response", async () => {
+    const client = new CodyClient(codyConfig);
 
-        const client = new CodyClient(codyConfig);
+    const messageText = "Hi!";
 
-        const messageText = "Hi!"
+    const params: SendMessageCommandInput = {
+      model: "HAIKU",
+      messages: [
+        {
+          text: messageText,
+        },
+      ],
+    };
+    const command = new SendMessageCommand(params);
 
-        const params: SendMessageCommandInput = {
-            model: "HAIKU",
-            messages: [{
-                text: messageText
-            }]
-        }
-        const command = new SendMessageCommand(params);
+    const data: SendMessageCommandOutput = await client.send(command);
 
-        const data: SendMessageCommandOutput = await client.send(command);
+    expect(data.$metadata.httpStatusCode).toBe(200);
+  });
 
-        expect(data.$metadata.httpStatusCode).toBe(200);
-    });
+  it("should return the message history", async () => {
+    const client = new CodyClient(codyConfig);
 
-    it('should return the message history', async () => {
+    const messageText = "Hi!";
 
-        const client = new CodyClient(codyConfig);
+    const params: SendMessageCommandInput = {
+      model: "HAIKU",
+      messages: [
+        {
+          text: messageText,
+        },
+      ],
+    };
+    const command = new SendMessageCommand(params);
 
-        const messageText = "Hi!"
+    const data: SendMessageCommandOutput = await client.send(command);
 
-        const params: SendMessageCommandInput = {
-            model: "HAIKU",
-            messages: [{
-                text: messageText
-            }]
-        }
-        const command = new SendMessageCommand(params);
-
-        const data: SendMessageCommandOutput = await client.send(command);
-
-        expect(data.messages[0].text).toBe(messageText);
-    });
+    expect(data.messages[0].text).toBe(messageText);
+  });
 });
