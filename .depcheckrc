@@ -1,2 +1,2 @@
 skip-missing: true
-ignores: ["rimraf"]
+ignores: ["rimraf", "jest-environment-jsdom", "@types/jest"]
