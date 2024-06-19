@@ -6,35 +6,134 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  build:
+  security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           registry-url: "https://npm.pkg.github.com"
-
-        # Skip post-install scripts here, as a malicious script could steal NODE_AUTH_TOKEN.
       - run: npm ci --ignore-scripts
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-
       - run: npm audit
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: "https://npm.pkg.github.com"
+      - run: npm ci --ignore-scripts
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - run: npm run build
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: "https://npm.pkg.github.com"
+      - run: npm ci --ignore-scripts
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - run: npm run lint
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: "https://npm.pkg.github.com"
+      - run: npm ci --ignore-scripts
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - run: npm run format
+
+  lint-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: "https://npm.pkg.github.com"
+      - run: npm ci --ignore-scripts
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - run: npm run lint:dependencies
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: RenFraser/CodyApi
+          path: CodyApi
+          token: ${{ secrets.CROSSREPOCHECKOUTTOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          repository: RenFraser/CodyApiTests
+          path: CodyApiTests
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://npm.pkg.github.com"
+
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        working-directory: CodyApi
+
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        working-directory: CodyApiTests
+
+      - run: npm run build
+        working-directory: CodyApi
+      - run: npm run start & # Start the API server in the background
+        working-directory: CodyApi
+      - run: npm run test
+        working-directory: CodyApiTests
+
+      # trying to be a good GitHub citizen - env gets torn down anyway
+      - run: pkill -f "npm run start" # Terminate the background server process
+        if: always() # Run this step even if the tests fail
 
   dependabot:
     permissions: write-all
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
-    needs: [build]
+    needs: [security, build, lint, format, lint-dependencies, integration-tests]
     steps:
       - name: Dependabot metadata
         id: metadata
