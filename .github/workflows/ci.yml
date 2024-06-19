@@ -1,0 +1,48 @@
+---
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: "https://npm.pkg.github.com"
+
+        # Skip post-install scripts here, as a malicious script could steal NODE_AUTH_TOKEN.
+      - run: npm ci --ignore-scripts
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+
+      - run: npm audit
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run format
+      - run: npm run lint:dependencies
+
+  dependabot:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    needs: [build]
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
