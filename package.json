@@ -3,16 +3,34 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc",
+    "clean": "run-p clean:dist clean:node_modules",
+    "clean:dist": "rimraf dist",
+    "clean:node_modules": "rimraf node_modules",
+    "start": "node dist/index.js",
+    "lint": "eslint '__tests__/**/*.{js,ts,json}'",
+    "lint:fix": "eslint '__tests__/**/*.{js,ts,json}' --fix",
+    "lint:dependencies": "depcheck",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/js": "^9.5.0",
     "@types/jest": "^29.5.12",
+    "depcheck": "^1.4.7",
+    "eslint": "^8.57.0",
+    "globals": "^15.6.0",
     "jest": "^29.7.0",
-    "typescript": "^5.4.5"
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.3.2",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.13.1"
   },
   "dependencies": {
     "@renfraser/cody-client": "^1.0.0",
