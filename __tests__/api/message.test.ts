@@ -1,5 +1,6 @@
 import {
   CodyClient,
+  Participant,
   SendMessageCommand,
   SendMessageCommandInput,
   SendMessageCommandOutput,
@@ -16,6 +17,7 @@ describe("SendMessage", () => {
       model: "HAIKU",
       messages: [
         {
+          participant: Participant.HUMAN,
           text: messageText,
         },
       ],
@@ -36,6 +38,7 @@ describe("SendMessage", () => {
       model: "HAIKU",
       messages: [
         {
+          participant: Participant.HUMAN,
           text: messageText,
         },
       ],
