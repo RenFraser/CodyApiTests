@@ -34,6 +34,6 @@
   "dependencies": {
     "@renfraser/cody-client": "^3.0.0",
     "@types/jest": "^29.5.12",
-    "ts-jest": "^29.2.3"
+    "ts-jest": "^29.2.4"
   }
 }
